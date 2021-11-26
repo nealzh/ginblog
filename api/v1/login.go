@@ -5,6 +5,7 @@ import (
 	"ginblog/model"
 	"ginblog/utils/errmsg"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -70,6 +71,12 @@ func setToken(c *gin.Context, user model.User) {
 			"token":   token,
 		})
 	}
+
+	session := sessions.Default(c)
+
+	session.Set("userid", user.ID)
+	session.Set("username", user.Username)
+	session.Save()
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  200,

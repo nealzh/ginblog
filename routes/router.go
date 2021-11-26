@@ -5,6 +5,7 @@ import (
 	"ginblog/middleware"
 	"ginblog/utils"
 	"github.com/gin-contrib/multitemplate"
+	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +20,8 @@ func InitRouter() {
 	gin.SetMode(utils.AppMode)
 	r := gin.New()
 	r.HTMLRender = createMyRender()
+	store := sessions.NewCookieStore([]byte("secret"))
+	r.Use(sessions.Sessions("serversession", store))
 	r.Use(middleware.Log())
 	r.Use(gin.Recovery())
 	r.Use(middleware.Cors())
