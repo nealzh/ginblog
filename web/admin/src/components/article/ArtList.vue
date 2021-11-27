@@ -37,8 +37,8 @@
         bordered
         @change="handleTableChange"
       >
-        <span class="ArtImg" slot="img" slot-scope="img">
-          <img :src="img" />
+        <span class="ArtImg" slot="ourl" slot-scope="ourl">
+          <img :src="ourl" />
         </span>
         <template slot="action" slot-scope="data">
           <div class="actionSlot">
@@ -107,11 +107,11 @@ const columns = [
   },
   {
     title: '缩略图',
-    dataIndex: 'img',
+    dataIndex: 'ourl',
     width: '20%',
-    key: 'img',
+    key: 'ourl',
     align: 'center',
-    scopedSlots: { customRender: 'img' },
+    scopedSlots: { customRender: 'ourl' },
   },
   {
     title: '操作',

@@ -15,7 +15,7 @@
       >
         <v-row no-gutters class="d-flex align-center">
           <v-col class="d-flex justify-center align-center ma-3" cols="1">
-            <v-img max-height="100" max-width="100" :src="item.img"></v-img>
+            <v-img max-height="100" max-width="100" :src="item.ourl"></v-img>
           </v-col>
           <v-col>
             <v-card-title>

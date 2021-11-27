@@ -14,8 +14,10 @@ import (
 	"github.com/qiniu/go-sdk/v7/storage"
 	"log"
 	"mime/multipart"
+	"net/url"
 	"reflect"
 	"strconv"
+	"time"
 
 	//"log"
 	"net/http"
@@ -28,19 +30,77 @@ var AccessKey = utils.StorageAccessKey
 var SecretKey = utils.StorageSecretKey
 var Bucket = utils.StorageBucket
 var ServerUrl = utils.StorageSever
+var ExpirationSeconds = utils.StorageExpirationSeconds
 
 func GetDownloadUrl(c *gin.Context) {
 
 	oid, _ := strconv.Atoi(c.Param("oid"))
 
-	url, contentType, code := model.GetDownloadUrl(oid)
+	updateState, url, contentType, code := CheckObjectUrlExpiration(uint(oid))
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":      code,
 		"message":     errmsg.GetErrMsg(code),
+		"updateState": updateState,
 		"url":         url,
 		"contentType": contentType,
 	})
+}
+
+func CheckObjectUrlExpiration(oid uint) (bool, string, string, int) {
+
+	obj := model.GetObject(uint(oid))
+
+	currentTime := time.Now()
+
+	var url string = obj.URL
+	var code int = errmsg.SUCCSE
+	var updateState = false
+
+	if obj.Expiration.Before(currentTime) {
+
+		url, code = CreateDownloadUrl(obj.Name)
+
+		obj.URL = url
+		obj.Expiration = currentTime.Add(time.Second * time.Duration(ExpirationSeconds))
+
+		model.UpdateDownloadUrl(obj.ID, obj)
+
+		updateState = true
+	}
+
+	return updateState, url, obj.ContentType, code
+}
+
+func CreateDownloadUrl(objName string) (string, int) {
+
+	ctx := context.Background()
+
+	useSSL := true
+
+	// Initialize minio client object.
+	minioClient, err := minio.New(ServerUrl, &minio.Options{
+		Creds:  credentials.NewStaticV4(AccessKey, SecretKey, ""),
+		Secure: useSSL,
+	})
+	if err != nil {
+		log.Fatalln(err)
+		return "", errmsg.ERROR
+	}
+
+	reqParams := make(url.Values)
+	//reqParams.Set("response-content-disposition", "attachment; filename=\"your-filename.txt\"")
+
+	// Generates a presigned url which expires in a day.
+	presignedURL, err := minioClient.PresignedGetObject(ctx, Bucket, objName, time.Second*time.Duration(ExpirationSeconds), reqParams)
+	if err != nil {
+		log.Fatalln(err)
+		return "", errmsg.ERROR
+	}
+
+	log.Println("presignedURL", presignedURL.String())
+
+	return presignedURL.String(), errmsg.ERROR
 }
 
 // UpLoad 上传图片接口
@@ -92,20 +152,23 @@ func UpLoad(c *gin.Context) {
 
 	objName, contentType, code = UpLoadObject(userid, file, fileSize, fileSuffix, fileContentType)
 
+	ourl, _ := CreateDownloadUrl(objName)
+
 	objectData := model.Object{}
 	objectData.Uid = userid
 	objectData.Name = objName
 	objectData.Suffix = fileSuffix
 	objectData.ContentType = contentType
+	objectData.URL = ourl
+	objectData.Expiration = time.Now()
 
 	oid, _ := model.CreateObject(&objectData)
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":      code,
-		"message":     errmsg.GetErrMsg(code),
-		"url":         objName,
-		"contentType": contentType,
-		"oid":         oid,
+		"status":  code,
+		"message": errmsg.GetErrMsg(code),
+		"oid":     oid,
+		"ourl":    ourl,
 	})
 }
 

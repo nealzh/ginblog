@@ -24,10 +24,11 @@ var (
 
 	StorageType string
 
-	StorageAccessKey string
-	StorageSecretKey string
-	StorageBucket    string
-	StorageSever     string
+	StorageAccessKey         string
+	StorageSecretKey         string
+	StorageBucket            string
+	StorageSever             string
+	StorageExpirationSeconds int
 )
 
 func init() {
@@ -66,6 +67,7 @@ func LoadObjectStorage(file *ini.File) {
 	StorageSecretKey = file.Section("storage").Key("SecretKey").String()
 	StorageBucket = file.Section("storage").Key("Bucket").String()
 	StorageSever = file.Section("storage").Key("Sever").String()
+	StorageExpirationSeconds, _ = file.Section("storage").Key("ExpirationSeconds").Int()
 }
 
 //func LoadQiniu(file *ini.File) {

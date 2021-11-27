@@ -8,7 +8,7 @@
       @click="$router.push(`article/detail/${item.ID}`)"
     >
       <v-avatar class="ma-3 hidden-sm-and-down" size="125" tile>
-        <v-img :src="item.img"></v-img>
+        <v-img :src="item.ourl"></v-img>
       </v-avatar>
 
       <v-col>

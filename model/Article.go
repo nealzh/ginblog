@@ -3,6 +3,7 @@ package model
 import (
 	"ginblog/utils/errmsg"
 	"gorm.io/gorm"
+	"log"
 )
 
 type Article struct {
@@ -13,6 +14,7 @@ type Article struct {
 	Desc         string `gorm:"type:varchar(256)" json:"desc"`
 	Content      string `gorm:"type:mediumtext" json:"content"`
 	Oid          int    `gorm:"type:int;not null" json:"oid"`
+	Ourl         string `gorm:"type:text" json:"ourl"`
 	CommentCount int    `gorm:"type:int;not null;default:0" json:"comment_count"`
 	ReadCount    int    `gorm:"type:int;not null;default:0" json:"read_count"`
 }
@@ -26,14 +28,27 @@ func CreateArt(data *Article) int {
 	return errmsg.SUCCSE
 }
 
+func UpdateArtImgUrl(aid uint, ourl string) int {
+
+	var art Article
+	var maps = make(map[string]interface{})
+	maps["ourl"] = ourl
+
+	err = db.Model(&art).Where("id = ? ", aid).Updates(&maps).Error
+	if err != nil {
+		return errmsg.ERROR
+	}
+	return errmsg.SUCCSE
+}
+
 // GetCateArt 查询分类下的所有文章
-func GetCateArt(id int, pageSize int, pageNum int) ([]Article, int, int64) {
+func GetCateArt(cid int, pageSize int, pageNum int) ([]Article, int, int64) {
 	var cateArtList []Article
 	var total int64
 
 	err = db.Preload("Category").Limit(pageSize).Offset((pageNum-1)*pageSize).Where(
-		"cid =?", id).Find(&cateArtList).Error
-	db.Model(&cateArtList).Where("cid =?", id).Count(&total)
+		"cid =?", cid).Find(&cateArtList).Error
+	db.Model(&cateArtList).Where("cid =?", cid).Count(&total)
 	if err != nil {
 		return nil, errmsg.ERROR_CATE_NOT_EXIST, 0
 	}
@@ -57,10 +72,11 @@ func GetArt(pageSize int, pageNum int) ([]Article, int, int64) {
 	var err error
 	var total int64
 
-	err = db.Select("article.id, title, img, img_content_type, created_at, updated_at, `desc`, comment_count, read_count, category.name").Limit(pageSize).Offset((pageNum - 1) * pageSize).Order("Created_At DESC").Joins("Category").Find(&articleList).Error
+	err = db.Select("article.id, title, oid, ourl, created_at, updated_at, `desc`, comment_count, read_count, category.name").Limit(pageSize).Offset((pageNum - 1) * pageSize).Order("Created_At DESC").Joins("Category").Find(&articleList).Error
 	// 单独计数
 	db.Model(&articleList).Count(&total)
 	if err != nil {
+		log.Fatalln(err)
 		return nil, errmsg.ERROR, 0
 	}
 	return articleList, errmsg.SUCCSE, total
@@ -71,7 +87,7 @@ func SearchArticle(title string, pageSize int, pageNum int) ([]Article, int, int
 	var articleList []Article
 	var err error
 	var total int64
-	err = db.Select("article.id,title, img, img_content_type, created_at, updated_at, `desc`, comment_count, read_count, category.name").Limit(pageSize).Offset((pageNum-1)*pageSize).Order("Created_At DESC").Joins("Category").Where("title LIKE ?",
+	err = db.Select("article.id,title, oid, ourl, created_at, updated_at, `desc`, comment_count, read_count, category.name").Limit(pageSize).Offset((pageNum-1)*pageSize).Order("Created_At DESC").Joins("Category").Where("title LIKE ?",
 		title+"%",
 	).Find(&articleList).Count(&total).Error
 	// 单独计数
@@ -91,7 +107,8 @@ func EditArt(id int, data *Article) int {
 	maps["cid"] = data.Cid
 	maps["desc"] = data.Desc
 	maps["content"] = data.Content
-	maps["img"] = data.Oid
+	maps["oid"] = data.Oid
+	maps["ourl"] = data.Ourl
 
 	err = db.Model(&art).Where("id = ? ", id).Updates(&maps).Error
 	if err != nil {

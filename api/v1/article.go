@@ -22,11 +22,35 @@ func AddArticle(c *gin.Context) {
 	})
 }
 
+func CheckArtImageUrlExpiration(art *model.Article) (bool, string) {
+
+	updateState, url, _, _ := CheckObjectUrlExpiration(uint(art.Oid))
+
+	if updateState == true {
+		model.UpdateArtImgUrl(art.ID, url)
+	}
+
+	art.Ourl = url
+
+	return updateState, url
+}
+
+func CheckArtsImageUrlExpiration(artArray []model.Article) {
+
+	for i := 0; i < len(artArray); i++ {
+		updateState, url := CheckArtImageUrlExpiration(&artArray[i])
+
+		if updateState == true {
+			artArray[i].Ourl = url
+		}
+	}
+}
+
 // GetCateArt 查询分类下的所有文章
 func GetCateArt(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.Query("pagesize"))
 	pageNum, _ := strconv.Atoi(c.Query("pagenum"))
-	id, _ := strconv.Atoi(c.Param("id"))
+	cid, _ := strconv.Atoi(c.Param("id"))
 
 	switch {
 	case pageSize >= 100:
@@ -39,7 +63,7 @@ func GetCateArt(c *gin.Context) {
 		pageNum = 1
 	}
 
-	data, code, total := model.GetCateArt(id, pageSize, pageNum)
+	data, code, total := model.GetCateArt(cid, pageSize, pageNum)
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,
@@ -53,6 +77,7 @@ func GetCateArt(c *gin.Context) {
 func GetArtInfo(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	data, code := model.GetArtInfo(id)
+	CheckArtImageUrlExpiration(&data)
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,
 		"data":    data,
@@ -78,6 +103,7 @@ func GetArt(c *gin.Context) {
 	}
 	if len(title) == 0 {
 		data, code, total := model.GetArt(pageSize, pageNum)
+		CheckArtsImageUrlExpiration(data)
 		c.JSON(http.StatusOK, gin.H{
 			"status":  code,
 			"data":    data,

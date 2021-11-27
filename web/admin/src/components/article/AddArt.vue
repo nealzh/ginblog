@@ -84,8 +84,8 @@ export default {
         cid: undefined,
         desc: '',
         content: '',
-        img: '',
-        img_content_type: '',
+        oid: undefined,
+        ourl: '',
       },
       Catelist: [],
       upUrl: Url + 'upload',
@@ -146,8 +146,8 @@ export default {
       }
       if (info.file.status === 'done') {
         this.$message.success(`图片上传成功`)
-        this.artInfo.img = info.file.response.url
-        this.artInfo.img_content_type = info.file.response.contentType
+        this.artInfo.oid = info.file.response.oid
+        this.artInfo.ourl = info.file.response.ourl
       } else if (info.file.status === 'error') {
         this.$message.error(`图片上传失败`)
       }
