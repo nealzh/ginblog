@@ -10,5 +10,4 @@ func main() {
 	model.InitDb()
 	// 引入路由组件
 	routes.InitRouter()
-
 }
