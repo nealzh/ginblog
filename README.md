@@ -1,3 +1,4 @@
+# fork from https://github.com/wejectchen/ginblog updated
 # Ginblog（项目已完成，欢迎使用)
 
 [![star](https://gitee.com/wejectchan/ginblog/badge/star.svg?theme=white)](https://gitee.com/wejectchan/ginblog/stargazers)

@@ -2,8 +2,9 @@ package model
 
 import (
 	"ginblog/utils/errmsg"
-	"gorm.io/gorm"
 	"log"
+
+	"gorm.io/gorm"
 )
 
 type Article struct {
@@ -12,7 +13,7 @@ type Article struct {
 	Title        string `gorm:"type:varchar(128);not null" json:"title"`
 	Cid          int    `gorm:"type:int;not null" json:"cid"`
 	Desc         string `gorm:"type:varchar(256)" json:"desc"`
-	Content      string `gorm:"type:mediumtext" json:"content"`
+	Content      string `gorm:"type:text" json:"content"`
 	Oid          int    `gorm:"type:int;not null" json:"oid"`
 	Ourl         string `gorm:"type:text" json:"ourl"`
 	CommentCount int    `gorm:"type:int;not null;default:0" json:"comment_count"`

@@ -129,9 +129,6 @@ func UpLoad(c *gin.Context) {
 	fileSuffixSlice := strings.Split(fileHeader.Filename, ".")
 	fileSuffixSliceLen := len(fileSuffixSlice)
 
-	//log.Println("Content-Type: ", fileHeader.Header.Get("Content-Type"))
-	fileContentType := fileHeader.Header.Get("Content-Type")
-
 	var fileSuffix string
 
 	if fileSuffixSliceLen >= 2 {
@@ -139,6 +136,9 @@ func UpLoad(c *gin.Context) {
 	} else {
 		fileSuffix = ""
 	}
+
+	//log.Println("Content-Type: ", fileHeader.Header.Get("Content-Type"))
+	fileContentType := fileHeader.Header.Get("Content-Type")
 
 	fileSize := fileHeader.Size
 
