@@ -57,6 +57,8 @@ func CheckObjectUrlExpiration(oid uint) (bool, string, string, int) {
 	var code int = errmsg.SUCCSE
 	var updateState = false
 
+	//log.Println(obj.Expiration, ";",currentTime, ";", obj.Expiration.Before(currentTime))
+
 	if obj.Expiration.Before(currentTime) {
 
 		url, code = CreateDownloadUrl(obj.Name)
@@ -160,7 +162,7 @@ func UpLoad(c *gin.Context) {
 	objectData.Suffix = fileSuffix
 	objectData.ContentType = contentType
 	objectData.URL = ourl
-	objectData.Expiration = time.Now()
+	objectData.Expiration = time.Now().Add(time.Second * time.Duration(ExpirationSeconds))
 
 	oid, _ := model.CreateObject(&objectData)
 
