@@ -1,0 +1,1 @@
+nohup ./ginblog.bin > ./main.log 2>&1 &

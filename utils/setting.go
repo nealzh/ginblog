@@ -1,8 +1,12 @@
 package utils
 
 import (
+	"crypto/rsa"
 	"fmt"
+	utils "ginblog/utils/rsa"
 	"gopkg.in/ini.v1"
+	"io/ioutil"
+	"log"
 )
 
 const (
@@ -29,6 +33,9 @@ var (
 	StorageBucket            string
 	StorageSever             string
 	StorageExpirationSeconds int
+
+	RsaPublicKey  *rsa.PublicKey
+	RsaPrivateKey *rsa.PrivateKey
 )
 
 func init() {
@@ -36,11 +43,26 @@ func init() {
 	if err != nil {
 		fmt.Println("配置文件读取错误，请检查文件路径:", err)
 	}
+
+	LoadRsaKey()
+
 	LoadServer(file)
 	LoadData(file)
-	//LoadQiniu(file)
 	LoadObjectStorageType(file)
 	LoadObjectStorage(file)
+}
+
+func LoadFileContent(filePath string) []byte {
+	fileContent, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fileContent
+}
+
+func LoadRsaKey() {
+	RsaPublicKey = utils.BytesToPublicKey(LoadFileContent("config/public.key"))
+	RsaPrivateKey = utils.BytesToPrivateKey(LoadFileContent("config/private.key"))
 }
 
 func LoadServer(file *ini.File) {
@@ -69,14 +91,3 @@ func LoadObjectStorage(file *ini.File) {
 	StorageSever = file.Section("storage").Key("Sever").String()
 	StorageExpirationSeconds, _ = file.Section("storage").Key("ExpirationSeconds").Int()
 }
-
-//func LoadQiniu(file *ini.File) {
-//	AccessKey = file.Section("qiniu").Key("AccessKey").String()
-//	SecretKey = file.Section("qiniu").Key("SecretKey").String()
-//	Bucket = file.Section("qiniu").Key("Bucket").String()
-//	QiniuSever = file.Section("qiniu").Key("QiniuSever").String()
-//}
-
-//func LoadMinio() {
-//
-//}
