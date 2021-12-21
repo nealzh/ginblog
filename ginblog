@@ -30,6 +30,17 @@ action() {
   return $rc
 }
 
+build()
+{
+  cd $ginblogDir/web/admin
+  npm run build
+  cd $ginblogDir/web/front
+  npm run build
+  cd $ginblogDir
+  go build -ldflags "-s -w" -o ginblog.bin
+  upx ginblog.bin
+}
+
 status()
 {
    output='printf "%-11s is Running and PID is %6s\n"'
@@ -57,6 +68,9 @@ stop()
 }
 
 case $1 in
+ build)
+      build
+      ;;
  start)
       start
       ;;
@@ -67,6 +81,6 @@ case $1 in
      status
      ;;
  *)
-   echo "Usage $0 {start|stop|status}"
+   echo "Usage $0 {build|start|stop|status}"
    exit 0
 esac
