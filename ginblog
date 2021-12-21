@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# apt-get install -y initscripts
+#. /etc/init.d/functions
+
+ginblogDir=~/workspace/go/ginblog
+
+#serverNum=`ps -eo comm,pid|awk 'ginblog.bin'|wc -l`
+serverNum=`ps -eo comm,pid|grep ginblog.bin|wc -l`
+
+success() {
+  echo -en "\\033[60G[\\033[1;32m  OK  \\033[0;39m]\r"
+  return 0
+}
+
+failure() {
+  local rc=$?
+  echo -en "\\033[60G[\\033[1;31mFAILED\\033[0;39m]\r"
+  [ -x /bin/plymouth ] && /bin/plymouth --details
+  return $rc
+}
+
+action() {
+  local STRING=$1
+  echo -n "$STRING "
+  shift
+  "$@" && success $"$STRING" || failure $"$STRING"
+  local rc=$?
+  echo
+  return $rc
+}
+
+status()
+{
+   output='printf "%-11s is Running and PID is %6s\n"'
+   [ $serverNum  -eq 1 ] && printf "%-11s is Running and PID is %6s\n"  "ginblog.bin" "`ps -eo comm,pid|grep ginblog.bin|awk '{print $2}'`" || echo "ginblog.bin is not Run"
+}
+
+start()
+{
+  #start ginblog server
+   if [ $serverNum -eq 1  ];then
+     echo "ginblog Server is already Running"
+   else
+     cd $ginblogDir
+     chmod +x ginblog.bin
+     nohup $ginblogDir/ginblog.bin > $ginblogDir/main.log 2>&1 &
+     [ $? -eq 0  ] && action "Starting ginblog.bin Sucessfull" /bin/true || action "Starting Failed" /bin/false
+  fi
+}
+
+stop()
+{
+  #stop ginblog server
+  killall -9 ginblog.bin >& /dev/null
+  [ $? -eq 0 ] && action "stop ginblog.bin" /bin/true || action "stop ginblog.bin" /bin/false
+}
+
+case $1 in
+ start)
+      start
+      ;;
+ stop)
+      stop
+      ;;
+ status)
+     status
+     ;;
+ *)
+   echo "Usage $0 {start|stop|status}"
+   exit 0
+esac
