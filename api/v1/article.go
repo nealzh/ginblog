@@ -65,6 +65,8 @@ func GetCateArt(c *gin.Context) {
 
 	data, code, total := model.GetCateArt(cid, pageSize, pageNum)
 
+	CheckArtsImageUrlExpiration(data)
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":  code,
 		"data":    data,
