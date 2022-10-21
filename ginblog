@@ -32,13 +32,15 @@ action() {
 
 build()
 {
-  cd $ginblogDir/web/admin
-  npm run build
-  cd $ginblogDir/web/front
-  npm run build
-  cd $ginblogDir
-  go build -ldflags "-s -w" -o ginblog.bin
-  upx ginblog.bin
+    cd $ginblogDir/web/front
+    npm install --force
+    npm run build
+    cd $ginblogDir/web/admin
+    npm install --force
+    npm run build
+    cd $ginblogDir
+    go build -ldflags "-s -w" -o ginblog.bin
+    upx ginblog.bin
 }
 
 status()
