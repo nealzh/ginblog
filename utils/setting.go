@@ -1,12 +1,8 @@
 package utils
 
 import (
-	"crypto/rsa"
 	"fmt"
-	utils "ginblog/utils/rsa"
 	"gopkg.in/ini.v1"
-	"io/ioutil"
-	"log"
 )
 
 const (
@@ -34,8 +30,8 @@ var (
 	StorageSever             string
 	StorageExpirationSeconds int
 
-	RsaPublicKey  *rsa.PublicKey
-	RsaPrivateKey *rsa.PrivateKey
+	//RsaPublicKey  *rsa.PublicKey
+	//RsaPrivateKey *rsa.PrivateKey
 )
 
 func init() {
@@ -44,7 +40,7 @@ func init() {
 		fmt.Println("配置文件读取错误，请检查文件路径:", err)
 	}
 
-	LoadRsaKey()
+	//LoadRsaKey()
 
 	LoadServer(file)
 	LoadData(file)
@@ -52,18 +48,18 @@ func init() {
 	LoadObjectStorage(file)
 }
 
-func LoadFileContent(filePath string) []byte {
-	fileContent, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return fileContent
-}
+//func LoadFileContent(filePath string) []byte {
+//	fileContent, err := ioutil.ReadFile(filePath)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	return fileContent
+//}
 
-func LoadRsaKey() {
-	RsaPublicKey = utils.BytesToPublicKey(LoadFileContent("config/public.key"))
-	RsaPrivateKey = utils.BytesToPrivateKey(LoadFileContent("config/private.key"))
-}
+//func LoadRsaKey() {
+//	RsaPublicKey = utils.BytesToPublicKey(LoadFileContent("config/public.key"))
+//	RsaPrivateKey = utils.BytesToPrivateKey(LoadFileContent("config/private.key"))
+//}
 
 func LoadServer(file *ini.File) {
 	AppMode = file.Section("server").Key("AppMode").MustString("debug")
